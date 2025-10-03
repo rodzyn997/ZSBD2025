@@ -1,0 +1,76 @@
+CREATE TABLE REGIONS (
+region_id INT NOT NULL PRIMARY KEY,
+region_name VARCHAR(50),
+);
+
+CREATE TABLE COUNTRIES (
+country_id INT NOT NULL PRIMARY KEY,
+country_name VARCHAR(100),
+region_id INT,
+FOREIGN KEY (region_id) REFERENCES REGIONS(region_id)
+);
+
+CREATE TABLE LOCATIONS (
+location_id INT NOT NULL PRIMARY KEY,
+street_address VARCHAR(255),
+postal_code VARCHAR(100),
+city VARCHAR(50),
+state_province VARCHAR(255),
+country_id INT,
+FOREIGN KEY (country_id) REFERENCES COUNTRIES(country_id)
+);
+
+CREATE TABLE JOBS (
+job_id INT NOT NULL PRIMARY KEY,
+job_title VARCHAR(255),
+min_salary VARCHAR(100),
+max_salary VARCHAR(100)
+);
+
+CREATE TABLE EMPLOYEES (
+employee_id int not null primary key,
+first_name varchar(255),
+last_name varchar(255),
+email varchar(255),
+phone_number varchar(255),
+hire_date date,
+job_id int,
+salary float,
+commision_pct float,
+manager_id INT,
+departament_id INT,
+foreign key (job_id) references JOBS(job_id),
+foreign key (manager_id) references EMPLOYEES(employee_id)
+);
+
+alter table JOBS
+add constraint check_salary
+CHECK (max_salary - min_salary >= 2000)
+
+create table DEPARTAMENTS(
+department_id int not null primary key ,
+department_name varchar(255),
+manager_id int,
+location_id int
+);
+
+alter table DEPARTAMENTS 
+ADD CONSTRAINT fk_location
+foreign key (location_id) references LOCATIONS(location_id);
+
+alter table DEPARTAMENTS 
+ADD CONSTRAINT fk_manager
+foreign key (manager_id) references EMPLOYEES(employee_id);
+
+create table JOB_HISTORY(
+employee_id int not null,
+start_date date not null,
+end_date date not null,
+job_id int,
+department_id int,
+primary key (employee_id, start_date),
+foreign key (job_id) references JOBS(job_id),
+foreign key (department_id) references DEPARTMENTS(department_id)
+);
+
+
