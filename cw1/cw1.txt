@@ -73,4 +73,11 @@ foreign key (job_id) references JOBS(job_id),
 foreign key (department_id) references DEPARTMENTS(department_id)
 );
 
+UPDATE JOBS
+SET MIN_SALARY = MIN_SALARY + 500,
+    MAX_SALARY = MAX_SALARY + 500
+WHERE LOWER(JOB_TITLE) LIKE '%b%'
+   OR LOWER(JOB_TITLE) LIKE '%s%'
 
+
+DROP TABLE REGIONS CASCADE CONSTRAINTS
