@@ -29,7 +29,7 @@ CREATE OR REPLACE VIEW v_wysokie_pensje AS
 	AND d.department_name = 'Finance'
 
 ==== zad 5 ====
-  
+
   CREATE OR REPLACE VIEW v_employees_5k_12k AS 
 	SELECT employee_id, last_name, first_name, salary, job_id, email, hire_date
 	FROM EMPLOYEES
@@ -37,5 +37,50 @@ CREATE OR REPLACE VIEW v_wysokie_pensje AS
 		AND salary BETWEEN 5000 AND 12000
   
 ==== zad 6 ====
+
+  a) tak , jezeli with check option to tylko w danym zakresie, jezeli join to nie 
+  b) tak , jezeli with check option to tylko w danym zakresie, jezeli join to nie
+  c) tak , jezeli join to nie 
+
+==== zad 7 ====
+
+CREATE OR REPLACE VIEW v_departments_4emp AS
+SELECT d.department_id, d.department_name,
+    COUNT(e.employee_id) AS liczba_pracownikow,
+    ROUND(AVG(e.salary), 2) AS srednia_pensja,
+    MAX(e.salary) AS najwyzsza_pensja
+FROM 
+    departments d
+JOIN 
+    employees e ON d.department_id = e.department_id
+GROUP BY 
+    d.department_id, d.department_name
+HAVING 
+    COUNT(e.employee_id) >= 4
+
+ INSERT INTO v_departments_4emp VALUES (200,'lolo', 23, 2500, 10000)
+a) cannot modify a column which maps to a non key-preserved table
+
+==== zad 8 ====
+
+  CREATE OR REPLACE VIEW v_employees_5k_12k AS 
+	SELECT employee_id, last_name, first_name, salary, job_id, email, hire_date
+	FROM EMPLOYEES
+	WHERE 1=1
+		AND salary BETWEEN 5000 AND 12000
+	WITH CHECK OPTION
+a) tak 
+b) nie
+
+==== zad 9 ====
+
+
+==== zad 10 ====
+
+SELECT * FROM EMPLOYEES 
+ORDER BY salary DESC 
+FETCH FIRST 10 ROWS ONLY
+
+
 
 
