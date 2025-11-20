@@ -170,7 +170,7 @@ SELECT DISTINCT
 FROM employees e
 JOIN sales s ON e.employee_id = s.employee_id
 JOIN jobs j ON e.job_id = j.job_id
-ORDER BY last_name, first_name;
+ORDER BY last_name, first_name
 
   
 
