@@ -1,4 +1,4 @@
-## zad 1.
+############### zad 1.
 
 DECLARE
     numer_max   departments.department_id%TYPE;
@@ -16,7 +16,7 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('Dodano departament: ' || nowy_dep || ' o ID ' || (numer_max + 10));
 END;
 
-## zad 2.
+############### zad 2.
 
 DECLARE
     numer_max   departments.department_id%TYPE;
@@ -37,5 +37,153 @@ BEGIN
     WHERE department_id = nowy_id;
 
     DBMS_OUTPUT.PUT_LINE('Dodano i zaktualizowano departament ID=' || nowy_id);
+END;
+
+############### zad 3.
+
+CREATE TABLE nowa (
+    liczba VARCHAR2(10)
+);
+
+BEGIN
+    FOR i IN 1..10 LOOP
+        IF i NOT IN (4, 6) THEN
+            INSERT INTO nowa VALUES (TO_CHAR(i));
+        END IF;
+    END LOOP;
+    COMMIT;
+END;
+
+############### zad 4.
+DECLARE
+    v_kraj COUNTRIES%ROWTYPE;
+BEGIN
+    SELECT * INTO v_kraj 
+    FROM COUNTRIES 
+    WHERE COUNTRY_ID = 'CA';
+
+    DBMS_OUTPUT.PUT_LINE('Nazwa kraju: ' || v_kraj.COUNTRY_NAME);
+    DBMS_OUTPUT.PUT_LINE('Region ID: ' || v_kraj.REGION_ID);
+END;
+
+############### zad 5.
+
+DECLARE
+    v_job JOBS%ROWTYPE; 
+BEGIN
+    UPDATE JOBS
+    SET MIN_SALARY = MIN_SALARY * 1.05
+    WHERE JOB_TITLE LIKE '%Manager%';
+
+    DBMS_OUTPUT.PUT_LINE('Zaktualizowano rekordów: ' || SQL%ROWCOUNT);
+END;
+
+BEGIN
+    ROLLBACK;
+    DBMS_OUTPUT.PUT_LINE('Zmiany zostały wycofane.');
+END;
+
+############### zad 6.
+
+DECLARE
+    v_job JOBS%ROWTYPE;
+BEGIN
+    SELECT * INTO v_job 
+    FROM (SELECT * FROM JOBS ORDER BY MAX_SALARY DESC)
+    WHERE ROWNUM = 1;
+
+    DBMS_OUTPUT.PUT_LINE('Stanowisko: ' || v_job.JOB_TITLE);
+    DBMS_OUTPUT.PUT_LINE('Max pensja: ' || v_job.MAX_SALARY);
+END;
+
+############### zad 7.
+
+DECLARE
+    CURSOR c_kraje (p_region_id NUMBER) IS
+        SELECT c.COUNTRY_NAME,
+               (SELECT COUNT(e.EMPLOYEE_ID)
+                FROM LOCATIONS l
+                JOIN DEPARTMENTS d ON l.LOCATION_ID = d.LOCATION_ID
+                JOIN EMPLOYEES e ON d.DEPARTMENT_ID = e.DEPARTMENT_ID
+                WHERE l.COUNTRY_ID = c.COUNTRY_ID) AS LICZBA_PRAC
+        FROM COUNTRIES c
+        WHERE c.REGION_ID = p_region_id;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('--- Region ID: 1 ---');
+    FOR r IN c_kraje(1) LOOP
+        DBMS_OUTPUT.PUT_LINE('Kraj: ' || r.COUNTRY_NAME || ', Pracowników: ' || r.LICZBA_PRAC);
+    END LOOP;
+END;
+############### zad 8.
+
+DECLARE
+    CURSOR c_prac IS
+        SELECT LAST_NAME, SALARY 
+        FROM EMPLOYEES 
+        WHERE DEPARTMENT_ID = 50;
+        
+    v_nazwisko EMPLOYEES.LAST_NAME%TYPE;
+    v_pensja   EMPLOYEES.SALARY%TYPE;
+BEGIN
+    OPEN c_prac;
+    LOOP
+        FETCH c_prac INTO v_nazwisko, v_pensja;
+        EXIT WHEN c_prac%NOTFOUND;
+        
+        IF v_pensja > 3100 THEN
+            DBMS_OUTPUT.PUT_LINE(v_nazwisko || ': nie dawać podwyżki');
+        ELSE
+            DBMS_OUTPUT.PUT_LINE(v_nazwisko || ': dać podwyżkę');
+        END IF;
+    END LOOP;
+    CLOSE c_prac;
+END;
+
+############### zad 9.
+
+DECLARE
+    CURSOR c_szukaj (p_min_sal NUMBER, p_max_sal NUMBER, p_imie_part VARCHAR2) IS
+        SELECT FIRST_NAME, LAST_NAME, SALARY
+        FROM EMPLOYEES
+        WHERE SALARY BETWEEN p_min_sal AND p_max_sal
+          AND UPPER(FIRST_NAME) LIKE '%' || UPPER(p_imie_part) || '%';
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('--- Widełki 1000-5000, imię zawiera "a" ---');
+    FOR r IN c_szukaj(1000, 5000, 'a') LOOP
+        DBMS_OUTPUT.PUT_LINE(r.FIRST_NAME || ' ' || r.LAST_NAME || ' (' || r.SALARY || ')');
+    END LOOP;
+
+    DBMS_OUTPUT.PUT_LINE(' '); 
+    
+    DBMS_OUTPUT.PUT_LINE('--- Widełki 5000-20000, imię zawiera "u" ---');
+    FOR r IN c_szukaj(5000, 20000, 'u') LOOP
+        DBMS_OUTPUT.PUT_LINE(r.FIRST_NAME || ' ' || r.LAST_NAME || ' (' || r.SALARY || ')');
+    END LOOP;
+END;
+
+
+############### zad 10.
+
+CREATE TABLE STATYSTYKI_MENEDZEROW (
+    MANAGER_ID NUMBER,
+    LICZBA_PODWLADNYCH NUMBER,
+    ROZNICA_PENSJI NUMBER
+);
+
+BEGIN
+    FOR r IN (
+        SELECT MANAGER_ID, 
+               COUNT(*) AS LICZBA, 
+               MAX(SALARY) - MIN(SALARY) AS ROZNICA
+        FROM EMPLOYEES
+        WHERE MANAGER_ID IS NOT NULL
+        GROUP BY MANAGER_ID
+    ) LOOP
+        INSERT INTO STATYSTYKI_MENEDZEROW (MANAGER_ID, LICZBA_PODWLADNYCH, ROZNICA_PENSJI)
+        VALUES (r.MANAGER_ID, r.LICZBA, r.ROZNICA);
+    END LOOP;
+    
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Tabela STATYSTYKI_MENEDZEROW została uzupełniona.');
 END;
 
